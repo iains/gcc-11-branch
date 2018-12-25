@@ -2121,6 +2121,7 @@ ix86_expand_branch (enum rtx_code code, rtx op0, rtx op1, rtx label)
 
   switch (mode)
     {
+    case E_HFmode:
     case E_SFmode:
     case E_DFmode:
     case E_XFmode:

@@ -1274,7 +1274,7 @@ extern const char *host_detect_local_cpu (int argc, const char **argv);
 
 #define VALID_FP_MODE_P(MODE)						\
   ((MODE) == SFmode || (MODE) == DFmode || (MODE) == XFmode		\
-   || (MODE) == SCmode || (MODE) == DCmode || (MODE) == XCmode)		\
+   || (MODE) == SCmode || (MODE) == DCmode || (MODE) == XCmode)
 
 #define VALID_INT_MODE_P(MODE)						\
   ((MODE) == QImode || (MODE) == HImode || (MODE) == SImode		\

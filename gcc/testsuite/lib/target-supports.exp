@@ -3167,7 +3167,7 @@ proc check_effective_target_has_q_floating_suffix { } {
 
 proc check_effective_target_float16 {} {
     return [check_no_compiler_messages_nocache float16 object {
-        _Float16 x;
+        _Float16 foo (_Float16 x) { return x; }
     } [add_options_for_float16 ""]]
 }
 

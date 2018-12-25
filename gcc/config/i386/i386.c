@@ -5458,6 +5458,14 @@ ix86_output_ssemov (rtx_insn *insn, rtx *operands)
     case MODE_SI:
       return "%vmovd\t{%1, %0|%0, %1}";
 
+    case MODE_HI:
+      if (GENERAL_REG_P (operands[0]))
+	return "vmovw\t{%1, %k0|%k0, %1}";
+      else if (GENERAL_REG_P (operands[1]))
+	return "vmovw\t{%k1, %0|%0, %k1}";
+      else
+	return "vmovw\t{%1, %0|%0, %1}";
+
     case MODE_DF:
       if (TARGET_AVX && REG_P (operands[0]) && REG_P (operands[1]))
 	return "vmovsd\t{%d1, %0|%0, %d1}";
@@ -5469,6 +5477,12 @@ ix86_output_ssemov (rtx_insn *insn, rtx *operands)
 	return "vmovss\t{%d1, %0|%0, %d1}";
       else
 	return "%vmovss\t{%1, %0|%0, %1}";
+
+    case MODE_HF:
+      if (REG_P (operands[0]) && REG_P (operands[1]))
+	return "vmovsh\t{%d1, %0|%0, %d1}";
+      else
+	return "vmovsh\t{%1, %0|%0, %1}";
 
     case MODE_V1DF:
       gcc_assert (!TARGET_AVX);
@@ -13953,7 +13967,7 @@ output_387_binary_op (rtx_insn *insn, rtx *operands)
 
   if (is_sse)
    {
-     p = (GET_MODE (operands[0]) == SFmode) ? "ss" : "sd";
+     p = GET_MODE (operands[0]) == SFmode ? "ss" : "sd";
      strcat (buf, p);
 
      if (TARGET_AVX)
@@ -19079,10 +19093,13 @@ inline_secondary_memory_needed (machine_mode mode, reg_class_t class1,
       if (!TARGET_SSE2)
 	return true;
 
+      if (!(INTEGER_CLASS_P (class1) || INTEGER_CLASS_P (class2)))
+	return true;
+
+      int msize = GET_MODE_SIZE (mode);
+
       /* Between SSE and general, we have moves no larger than word size.  */
-      if (!(INTEGER_CLASS_P (class1) || INTEGER_CLASS_P (class2))
-	  || GET_MODE_SIZE (mode) < GET_MODE_SIZE (SImode)
-	  || GET_MODE_SIZE (mode) > UNITS_PER_WORD)
+      if (msize < GET_MODE_SIZE (SImode) || msize > UNITS_PER_WORD)
 	return true;
 
       /* If the target says that inter-unit moves are more expensive
@@ -19176,21 +19193,27 @@ ix86_can_change_mode_class (machine_mode from, machine_mode to,
 static inline int
 sse_store_index (machine_mode mode)
 {
-      switch (GET_MODE_SIZE (mode))
-	{
-	  case 4:
-	    return 0;
-	  case 8:
-	    return 1;
-	  case 16:
-	    return 2;
-	  case 32:
-	    return 3;
-	  case 64:
-	    return 4;
-	  default:
-	    return -1;
-	}
+  /* NB: Use SFmode cost for HFmode instead of adding HFmode load/store
+     costs to processor_costs, which requires changes to all entries in
+     processor cost table.  */
+  if (mode == E_HFmode)
+    mode = E_SFmode;
+
+  switch (GET_MODE_SIZE (mode))
+    {
+    case 4:
+      return 0;
+    case 8:
+      return 1;
+    case 16:
+      return 2;
+    case 32:
+      return 3;
+    case 64:
+      return 4;
+    default:
+      return -1;
+    }
 }
 
 /* Return the cost of moving data of mode M between a
@@ -19212,11 +19235,13 @@ static inline int
 inline_memory_move_cost (machine_mode mode, enum reg_class regclass, int in)
 {
   int cost;
+
   if (FLOAT_CLASS_P (regclass))
     {
       int index;
       switch (mode)
 	{
+	  case E_HFmode:
 	  case E_SFmode:
 	    index = 0;
 	    break;
@@ -19317,11 +19342,32 @@ inline_memory_move_cost (machine_mode mode, enum reg_class regclass, int in)
 	  }
 	break;
       case 2:
-	if (in == 2)
-	  return MAX (ix86_cost->hard_register.int_load[1],
-		      ix86_cost->hard_register.int_store[1]);
-	return in ? ix86_cost->hard_register.int_load[1]
-		  : ix86_cost->hard_register.int_store[1];
+	{
+	  int cost;
+	  if (in == 2)
+	    cost = MAX (ix86_cost->hard_register.int_load[1],
+			ix86_cost->hard_register.int_store[1]);
+	  else
+	    cost = in ? ix86_cost->hard_register.int_load[1]
+		      : ix86_cost->hard_register.int_store[1];
+
+	  if (mode == E_HFmode)
+	    {
+	      /* Prefer SSE over GPR for HFmode.  */
+	      int sse_cost;
+	      int index = sse_store_index (mode);
+	      if (in == 2)
+		sse_cost = MAX (ix86_cost->hard_register.sse_load[index],
+				ix86_cost->hard_register.sse_store[index]);
+	      else
+		sse_cost = (in
+			    ? ix86_cost->hard_register.sse_load [index]
+			    : ix86_cost->hard_register.sse_store [index]);
+	      if (sse_cost >= cost)
+		cost = sse_cost + 1;
+	    }
+	  return cost;
+	}
       default:
 	if (in == 2)
 	  cost = MAX (ix86_cost->hard_register.int_load[2],
@@ -19495,6 +19541,8 @@ ix86_hard_regno_mode_ok (unsigned int regno, machine_mode mode)
 	  - XI mode
 	  - any of 512-bit wide vector mode
 	  - any scalar mode.  */
+      /* For AVX512FP16, vmovw supports movement of HImode
+	 between gpr and sse registser.  */
       if (TARGET_AVX512F
 	  && (mode == XImode
 	      || VALID_AVX512F_REG_MODE (mode)
@@ -21851,6 +21899,10 @@ ix86_mangle_type (const_tree type)
 
   switch (TYPE_MODE (type))
     {
+    case E_HFmode:
+      /* _Float16 is "DF16_".
+	 Align with clang's decision in https://reviews.llvm.org/D33719. */
+      return "DF16_";
     case E_TFmode:
       /* __float128 is "g".  */
       return "g";
