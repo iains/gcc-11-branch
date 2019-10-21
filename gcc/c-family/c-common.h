@@ -1447,6 +1447,7 @@ extern void warn_for_multistatement_macros (location_t, location_t,
 /* In c-attribs.c.  */
 extern bool attribute_takes_identifier_p (const_tree);
 extern tree handle_deprecated_attribute (tree *, tree, tree, int, bool *);
+extern bool attribute_clang_form_p (const_tree);
 extern tree handle_unused_attribute (tree *, tree, tree, int, bool *);
 extern tree handle_fallthrough_attribute (tree *, tree, tree, int, bool *);
 extern int parse_tm_stmt_attr (tree, int);
