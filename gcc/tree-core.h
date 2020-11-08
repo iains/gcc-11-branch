@@ -1018,7 +1018,8 @@ struct GTY(()) tree_base {
       unsigned user_align : 1;
       unsigned nameless_flag : 1;
       unsigned atomic_flag : 1;
-      unsigned spare0 : 3;
+      unsigned unavailable_flag : 1;
+      unsigned spare0 : 2;
 
       unsigned spare1 : 8;
 
@@ -1340,6 +1341,12 @@ struct GTY(()) tree_base {
        SSA_NAME_POINTS_TO_READONLY_MEMORY in
 	   SSA_NAME
 
+   unavailable_flag:
+
+       TREE_UNAVAILABLE in
+	   all decls
+	   all types
+
    visited:
 
        TREE_VISITED in
@@ -1387,6 +1394,7 @@ struct GTY(()) tree_base {
 
        CALL_EXPR_BY_DESCRIPTOR in
            CALL_EXPR
+
 */
 
 struct GTY(()) tree_typed {
