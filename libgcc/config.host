@@ -1620,6 +1620,17 @@ case ${host} in
 i[34567]86-*-elfiamcu | i[34567]86-*-rtems*)
 	# These use soft-fp for SFmode and DFmode, not just TFmode.
 	;;
+i[34567]86-*-darwin* | x86_64-*-darwin*)
+  	tmake_file="${tmake_file} t-softfp-tf"
+	if test "${host_address}" = 32; then
+		tmake_file="${tmake_file} i386/${host_address}/t-softfp"
+	fi
+	# Extra hf stuff.
+	if test "${host_address}" = 64; then
+		tmake_file="${tmake_file} i386/${host_address}/t-softfp"
+	fi
+	tmake_file="${tmake_file} i386/t-softfp t-softfp"
+	;;
 i[34567]86-*-* | x86_64-*-*)
   	tmake_file="${tmake_file} t-softfp-tf"
 	if test "${host_address}" = 32; then
