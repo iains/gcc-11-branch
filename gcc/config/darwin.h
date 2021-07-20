@@ -43,6 +43,8 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #define DARWIN_X86 0
 #define DARWIN_PPC 0
 
+#define OBJECT_FORMAT_MACHO 1
+
 /* Suppress g++ attempt to link in the math library automatically. */
 #define MATH_LIBRARY ""
 
@@ -275,13 +277,17 @@ extern GTY(()) int darwin_ms_struct;
 #define DARWIN_RDYNAMIC "%{rdynamic:%nrdynamic is not supported}"
 #endif
 
-/* FIXME: we should check that the linker supports the -pie and -no_pie.
+/* Code built with mdynamic-no-pic does not support PIE/PIC, so  we disallow
+   these combinations; we also ensure that the no_pie option is passed to
+   ld64 on system versions that default to PIE when mdynamic-no-pic is given.
+   FIXME: we should check that the linker supports the -pie and -no_pie.
    options.  */
 #define DARWIN_PIE_SPEC \
 "%{pie|fpie|fPIE:\
    %{mdynamic-no-pic: \
      %n'-mdynamic-no-pic' overrides '-pie', '-fpie' or '-fPIE'; \
-     :%:version-compare(>= 10.5 mmacosx-version-min= -pie) }} "
+     :%:version-compare(>= 10.5 mmacosx-version-min= -pie) }; \
+   mdynamic-no-pic:%:version-compare(>= 10.7 mmacosx-version-min= -no_pie) } "
 
 #define DARWIN_NOPIE_SPEC \
 "%{no-pie|fno-pie|fno-PIE: \
@@ -381,7 +387,7 @@ extern GTY(()) int darwin_ms_struct;
     DARWIN_NOPIE_SPEC \
     DARWIN_RDYNAMIC \
     DARWIN_NOCOMPACT_UNWIND \
-    "}}}}}}} %<pie %<no-pie %<rdynamic %<X "
+    "}}}}}}} %<pie %<no-pie %<rdynamic %<X %<rpath "
 
 /* Spec that controls whether the debug linker is run automatically for
    a link step.  This needs to be done if there is a source file on the
