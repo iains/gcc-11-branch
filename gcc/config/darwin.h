@@ -43,6 +43,8 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #define DARWIN_X86 0
 #define DARWIN_PPC 0
 
+#define OBJECT_FORMAT_MACHO 1
+
 /* Suppress g++ attempt to link in the math library automatically. */
 #define MATH_LIBRARY ""
 
@@ -283,13 +285,17 @@ extern GTY(()) int darwin_ms_struct;
 #define DARWIN_RDYNAMIC "%{rdynamic:%nrdynamic is not supported}"
 #endif
 
-/* FIXME: we should check that the linker supports the -pie and -no_pie.
+/* Code built with mdynamic-no-pic does not support PIE/PIC, so  we disallow
+   these combinations; we also ensure that the no_pie option is passed to
+   ld64 on system versions that default to PIE when mdynamic-no-pic is given.
+   FIXME: we should check that the linker supports the -pie and -no_pie.
    options.  */
 #define DARWIN_PIE_SPEC \
 "%{pie|fpie|fPIE:\
    %{mdynamic-no-pic: \
      %n'-mdynamic-no-pic' overrides '-pie', '-fpie' or '-fPIE'; \
-     :%:version-compare(>= 10.5 mmacosx-version-min= -pie) }} "
+     :%:version-compare(>= 10.5 mmacosx-version-min= -pie) }; \
+   mdynamic-no-pic:%:version-compare(>= 10.7 mmacosx-version-min= -no_pie) } "
 
 #define DARWIN_NOPIE_SPEC \
 "%{no-pie|fno-pie|fno-PIE: \
@@ -389,7 +395,7 @@ extern GTY(()) int darwin_ms_struct;
     DARWIN_NOPIE_SPEC \
     DARWIN_RDYNAMIC \
     DARWIN_NOCOMPACT_UNWIND \
-    "}}}}}}} %<pie %<no-pie %<rdynamic %<X "
+    "}}}}}}} %<pie %<no-pie %<rdynamic %<X %<rpath "
 
 /* Spec that controls whether the debug linker is run automatically for
    a link step.  This needs to be done if there is a source file on the
@@ -445,6 +451,7 @@ extern GTY(()) int darwin_ms_struct;
                      %:replace-outfile(-lobjc libobjc-gnu.a%s); \
                     :%:replace-outfile(-lobjc -lobjc-gnu )}}\
    %{static|static-libgcc|static-libgfortran:%:replace-outfile(-lgfortran libgfortran.a%s)}\
+   %{static|static-libgcc|static-libphobos:%:replace-outfile(-lgphobos libgphobos.a%s)}\
    %{static|static-libgcc|static-libstdc++|static-libgfortran:%:replace-outfile(-lgomp libgomp.a%s)}\
    %{static|static-libgcc|static-libstdc++:%:replace-outfile(-lstdc++ libstdc++.a%s)}\
    %{force_cpusubtype_ALL:-arch %(darwin_arch)} \
@@ -867,13 +874,12 @@ int darwin_label_is_anonymous_local_objc_name (const char *name);
   if ((LOG) != 0)			\
     fprintf (FILE, "\t%s\t%d\n", ALIGN_ASM_OP, (LOG))
 
-/* The maximum alignment which the object file format can support in
-   bits.  For Mach-O, this is 2^15 bytes.  */
+/* The maximum alignment which the object file format can support in bits
+   which depends on the OS version and whether the object is a common
+   variable.  */
 
 #undef	MAX_OFILE_ALIGNMENT
-#define MAX_OFILE_ALIGNMENT (0x8000 * 8)
-
-#define L2_MAX_OFILE_ALIGNMENT 15
+#define MAX_OFILE_ALIGNMENT ((1U << L2_MAX_OFILE_ALIGNMENT) * 8U)
 
 /*  These are the three variants that emit referenced blank space.  */
 #define ASM_OUTPUT_ALIGNED_BSS(FILE, DECL, NAME, SIZE, ALIGN)		\

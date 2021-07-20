@@ -42,6 +42,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "explow.h"
 #include "expr.h"
 #include "langhooks.h"
+#include "targhooks.h"
 #include "toplev.h"
 #include "lto-section-names.h"
 #include "intl.h"
@@ -131,7 +132,7 @@ int emit_aligned_common = false;
    DIRECTIVE is as for output_section_asm_op.  */
 
 static void
-output_objc_section_asm_op (const void *directive)
+output_objc_section_asm_op (const char *directive)
 {
   static bool been_here = false;
 
@@ -1933,6 +1934,8 @@ darwin_label_is_anonymous_local_objc_name (const char *name)
     }
   else if (!strncmp ((const char *)p, "ClassMethods", 12))
     return false;
+  else if (!strncmp ((const char *)p, "ClassProtocols", 14))
+    return false;
   else if (!strncmp ((const char *)p, "Instance", 8))
     {
       if (p[8] == 'I' || p[8] == 'M')
@@ -2556,7 +2559,6 @@ darwin_emit_common (FILE *fp, const char *name,
     rounded = (size + (align-1)) & ~(align-1);
 
   l2align = floor_log2 (align);
-  gcc_assert (l2align <= L2_MAX_OFILE_ALIGNMENT);
 
   in_section = comm_section;
   /* We mustn't allow multiple public symbols to share an address when using
@@ -2707,6 +2709,10 @@ darwin_asm_output_aligned_decl_common (FILE *fp, tree decl, const char *name,
 #ifdef DEBUG_DARWIN_MEM_ALLOCATORS
 fprintf (fp, "# adcom: %s (%d,%d) decl=0x0\n", name, (int)size, (int)align);
 #endif
+     /* Common variables are limited to a maximum alignment of 2^15.  */
+      if (align > 32768)
+	error_at (UNKNOWN_LOCATION, "common variables must have an alignment"
+		  " of 32678 or less");
       darwin_emit_common (fp, name, size, align);
       return;
     }
@@ -2734,7 +2740,7 @@ fprintf (fp, "# adcom: %s (%lld,%d) ro %d cst %d stat %d com %d pub %d"
     }
 
   /* We shouldn't be messing with this if the decl has a section name.  */
-  gcc_assert (DECL_SECTION_NAME (decl) == NULL);
+  gcc_checking_assert (DECL_SECTION_NAME (decl) == NULL);
 
   /* We would rather not have to check this here - but it seems that we might
      be passed a decl that should be in coalesced space.  */
@@ -2763,10 +2769,16 @@ fprintf (fp, "# adcom: %s (%lld,%d) ro %d cst %d stat %d com %d pub %d"
 
   l2align = floor_log2 (align / BITS_PER_UNIT);
   /* Check we aren't asking for more aligment than the platform allows.  */
-  gcc_assert (l2align <= L2_MAX_OFILE_ALIGNMENT);
+  gcc_checking_assert (l2align <= L2_MAX_OFILE_ALIGNMENT);
 
   if (TREE_PUBLIC (decl) != 0)
-    darwin_emit_common (fp, name, size, align);
+    {
+      /* Common variables are limited to a maximum alignment of 2^15.  */
+      if (l2align > 15)
+	error_at (DECL_SOURCE_LOCATION (decl), "common variables must have"
+		  " an alignment of 32678 or less");
+      darwin_emit_common (fp, name, size, align);
+    }
   else
     darwin_emit_local_bss (fp, decl, name, size, l2align);
 }
@@ -3609,7 +3621,7 @@ tree
 darwin_fold_builtin (tree fndecl, int n_args, tree *argp,
 		     bool ARG_UNUSED (ignore))
 {
-  unsigned int fcode = DECL_MD_FUNCTION_CODE (fndecl);
+  int fcode = DECL_MD_FUNCTION_CODE (fndecl);
 
   if (fcode == darwin_builtin_cfstring)
     {
@@ -3637,19 +3649,22 @@ darwin_rename_builtins (void)
 {
 }
 
+/* Implementation for the TARGET_LIBC_HAS_FUNCTION hook.  */
+
 bool
 darwin_libc_has_function (enum function_class fn_class,
 			  tree type ATTRIBUTE_UNUSED)
 {
-  if (fn_class == function_sincos)
+  if (fn_class == function_sincos && darwin_macosx_version_min)
     return (strverscmp (darwin_macosx_version_min, "10.9") >= 0);
-
+#if DARWIN_PPC && SUPPORT_DARWIN_LEGACY
   if (fn_class == function_c99_math_complex
       || fn_class == function_c99_misc)
     return (TARGET_64BIT
-	    || strverscmp (darwin_macosx_version_min, "10.3") >= 0);
-
-  return true;
+	    || (darwin_macosx_version_min &&
+		strverscmp (darwin_macosx_version_min, "10.3") >= 0));
+#endif
+  return default_libc_has_function (fn_class, type);
 }
 
 hashval_t
