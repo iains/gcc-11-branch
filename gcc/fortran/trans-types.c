@@ -2245,7 +2245,7 @@ gfc_sym_type (gfc_symbol * sym)
 
   if (sym->ts.type == BT_CHARACTER
       && ((sym->attr.function && sym->attr.is_bind_c)
-	  || (sym->attr.result
+	  || ((sym->attr.result || sym->attr.value)
 	      && sym->ns->proc_name
 	      && sym->ns->proc_name->attr.is_bind_c)
 	  || (sym->ts.deferred && (!sym->ts.u.cl
