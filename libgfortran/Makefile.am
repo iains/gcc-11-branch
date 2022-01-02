@@ -186,6 +186,8 @@ endif
 
 if IEEE_SUPPORT
 
+gfor_ieee_helper_src=ieee/ieee_helper.c
+
 gfor_helper_src+=ieee/ieee_helper.c
 
 gfor_ieee_src= \
@@ -991,7 +993,10 @@ intrinsics/selected_real_kind.lo intrinsics/selected_int_kind.lo: AM_FCFLAGS += 
 
 if IEEE_SUPPORT
 # Add flags for IEEE modules
-$(patsubst %.F90,%.lo,$(gfor_ieee_src)): AM_FCFLAGS += -Wno-unused-dummy-argument -Wno-c-binding-type -ffree-line-length-0 -fallow-leading-underscore
+$(patsubst %.F90,%.lo,$(gfor_ieee_src)): AM_FCFLAGS += -Wno-unused-dummy-argument -Wno-c-binding-type -ffree-line-length-0 -fallow-leading-underscore -fsignaling-nans
+
+# Add flags for IEEE helper code
+$(patsubst %.c,%.lo,$(gfor_ieee_helper_src)): AM_CFLAGS += -fsignaling-nans
 endif
 
 # Dependencies between IEEE_ARITHMETIC and IEEE_EXCEPTIONS
