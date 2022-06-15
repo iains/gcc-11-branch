@@ -14,7 +14,22 @@ Please see gcc/config/aarch64/darwinpcs.md for a description of the macOS AArch6
 
 Please report issues for this branch to: https://github.com/iains/gcc-11-branch/issues
 
-The current release is GCC-11.3-darwin-r0.
+**_The current release is GCC-12.1-darwin-r1. (June 2022)_**
+
+This release:
+ * Fixes a critical bug in the Arm64 port (related to Issue #3, which is unfixed in Xcode toolchains in common use).
+ * Adds a new configure option ```--with-darwin-extra-rpath=``` which allows a distribution to prepend a run path to the list automatically added by the compiler.  This is to allow for cases where the distribution refers to installed libraries using symlinks from outside the installation paths.
+ * Resolves a potential issue with library references where a minor GCC version is replaced by the next and the old version is deleted.
+ * Amends some of the system version processing to handle changes expected in macOS 13+.
+ * Improves interoperability with clang in mixed code projects.
+
+Thanks to contributors and testers.
+
+Release GCC-11.3-darwin-r1 (May 2022).
+
+ * Fix missing __float128 support in libgfortran.
+
+Release GCC-11.3-darwin-r0 (May 2022).
 
 Test results : https://github.com/iains/gcc-11-branch/issues/1#issue-1228803806
 
