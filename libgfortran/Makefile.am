@@ -30,8 +30,8 @@ version_arg =
 version_dep =
 endif
 if ENABLE_DARWIN_AT_RPATH
-extra_ldflags_libgfortran += -nodefaultrpaths -nodefaultexports
-extra_ldflags_libgfortran += -Wl,-rpath,@loader_path/
+extra_darwin_ldflags_libgfortran += -Wc,-nodefaultrpaths 
+extra_darwin_ldflags_libgfortran += -Wl,-rpath,@loader_path
 endif
 
 gfor_c_HEADERS = $(srcdir)/ISO_Fortran_binding.h
