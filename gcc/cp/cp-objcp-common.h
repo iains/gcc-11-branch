@@ -34,6 +34,7 @@ extern tree cp_unit_size_without_reusable_padding (tree);
 extern tree cp_get_global_decls ();
 extern tree cp_pushdecl (tree);
 extern void cp_register_dumps (gcc::dump_manager *);
+extern void cp_register_features ();
 extern bool cp_handle_option (size_t, const char *, HOST_WIDE_INT, int,
 			      location_t, const struct cl_option_handlers *);
 extern tree cxx_make_type_hook			(tree_code);
