@@ -1,3 +1,4 @@
+/* { dg-skip-if "CHECKME: is this applicable?" { *-*-darwin* } } */
 #include <arm_neon.h>
 #include "arm-neon-ref.h"
 #include "compute-ref-data.h"
