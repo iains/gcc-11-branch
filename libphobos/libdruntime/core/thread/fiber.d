@@ -1784,6 +1784,7 @@ version (OSX)
 {
     version (X86)    version = UnsafeFiberMigration;
     version (X86_64) version = UnsafeFiberMigration;
+    version (AArch64) version = UnsafeFiberMigration;
 }
 
 version (UnsafeFiberMigration)
