@@ -131,6 +131,9 @@ along with GCC; see the file COPYING3.  If not see
 /* We default to x86_64 for single-arch builds, bi-arch overrides.  */
 #define DARWIN_ARCH_SPEC "x86_64"
 
+#undef DARWIN_HEAP_T_LIB
+#define DARWIN_HEAP_T_LIB " -lheapt_w "
+
 #undef SUBTARGET_EXTRA_SPECS
 #define SUBTARGET_EXTRA_SPECS                                   \
   DARWIN_EXTRA_SPECS                                            \
@@ -341,3 +344,9 @@ along with GCC; see the file COPYING3.  If not see
 #define CLEAR_INSN_CACHE(beg, end)				\
   extern void sys_icache_invalidate(void *start, size_t len);	\
   sys_icache_invalidate ((beg), (size_t)((end)-(beg)))
+
+/* Disable custom function descriptors for Darwin when we have off-stack
+   trampolines.  */
+#undef X86_CUSTOM_FUNCTION_TEST
+#define X86_CUSTOM_FUNCTION_TEST \
+  (flag_trampolines && flag_trampoline_impl == TRAMPOLINE_IMPL_HEAP) ? 0 : 1
