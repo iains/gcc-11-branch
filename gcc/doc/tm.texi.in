@@ -932,6 +932,8 @@ Do not define this macro if it would never modify @var{m}.
 
 @hook TARGET_PROMOTE_FUNCTION_MODE
 
+@hook TARGET_PROMOTE_FUNCTION_MODE_CA
+
 @defmac PARM_BOUNDARY
 Normal alignment required for function parameters on the stack, in
 bits.  All stack parameters receive at least this much alignment
