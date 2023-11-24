@@ -134,9 +134,9 @@ jcf_dependency_write (void)
   gcc_assert (dependencies);
 
   if (print_dummies)
-    deps_write (dependencies, dep_out, 1, 72);
+    deps_write (dependencies, dep_out, true, 72);
   else
-    deps_write (dependencies, dep_out, 0, 72);
+    deps_write (dependencies, dep_out, false, 72);
 
   fflush (dep_out);
 }

@@ -473,6 +473,36 @@ deps_write (const cpp_reader *pfile, FILE *fp, unsigned int colmax)
   make_write (pfile, fp, colmax);
 }
 
+/* Support old non-modular interface for Java.  */
+static void
+make_write_non_modular (const class mkdeps *d, FILE *fp, bool phony,
+			unsigned int colmax)
+{
+  if (colmax && colmax < 34)
+    colmax = 34;
+
+  if (d->deps.size ())
+    {
+      unsigned column = make_write_vec (d->targets, fp, 0, colmax, d->quote_lwm);
+      fputs (":", fp);
+      column++;
+      make_write_vec (d->deps, fp, column, colmax);
+      fputs ("\n", fp);
+      if (phony)
+	for (unsigned i = 1; i < d->deps.size (); i++)
+	  fprintf (fp, "%s:\n", munge (d->deps[i]));
+    }
+}
+
+/* Write out dependencies according to the selected format (which is
+   only Make at the moment).  */
+
+void
+deps_write (const class mkdeps *d, FILE *fp, bool phony, unsigned int colmax)
+{
+  make_write_non_modular (d, fp, phony, colmax);
+}
+
 /* Write out a deps buffer to a file, in a form that can be read back
    with deps_restore.  Returns nonzero on error, in which case the
    error number will be in errno.  */
