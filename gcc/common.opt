@@ -3454,6 +3454,10 @@ static-libphobos
 Driver
 ; Documented for D, but always accepted by driver.
 
+static-libjava
+Driver
+; Documented for Java, but always accepted by driver.
+
 static-libstdc++
 Driver
 
