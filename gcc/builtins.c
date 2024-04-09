@@ -7826,6 +7826,12 @@ expand_builtin_trap (void)
 static void
 expand_builtin_unreachable (void)
 {
+  /* If the target wants a trap in place of the fall-through, use that.  */
+  if (targetm.unreachable_should_trap ())
+    {
+      expand_builtin_trap ();
+      return;
+    }
   emit_barrier ();
 }
 

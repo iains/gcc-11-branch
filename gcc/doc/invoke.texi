@@ -883,7 +883,7 @@ Objective-C and Objective-C++ Dialects}.
 -twolevel_namespace  -umbrella  -undefined @gol
 -unexported_symbols_list  -weak_reference_mismatches @gol
 -whatsloaded  -F  -gused  -gfull  -mmacosx-version-min=@var{version} @gol
--mkernel  -mone-byte-bool}
+-mkernel  -mone-byte-bool -munreachable-traps}
 
 @emph{DEC Alpha Options}
 @gccoptlist{-mno-fp-regs  -msoft-float @gol
@@ -21904,6 +21904,12 @@ to generate code that is not binary compatible with code generated
 without that switch.  Using this switch may require recompiling all
 other modules in a program, including system libraries.  Use this
 switch to conform to a non-default data model.
+
+@item -munreachable-traps
+@itemx -munreachable-traps
+@opindex munreachable-traps
+Causes @code{__builtin_unreachable} to be rendered as a trap.  This is the
+default for all Darwin architectures.
 
 @item -mfix-and-continue
 @itemx -ffix-and-continue
