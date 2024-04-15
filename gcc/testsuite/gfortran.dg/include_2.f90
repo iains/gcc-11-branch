@@ -24,6 +24,7 @@ end subroutine b
 ! PR debug/33739
 ! { dg-do link }
 ! { dg-options "-fpreprocessed -g3" }
+! { dg-skip-if "no support for -g3" { *-*-darwin2* } }
     call a
     call b
 end
