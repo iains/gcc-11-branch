@@ -1,9 +1,10 @@
 ! { dg-do run }
 ! { dg-require-effective-target stdint_types }
 ! { dg-additional-sources c_kinds.c }
-! { dg-options "-w -std=c99" }
+! { dg-options "-w -std=gnu99" }
 ! the -w option is needed to make f951 not report a warning for 
-! the -std=c99 option that the C file needs.
+! the -std=gnu99 option that the C file needs; it must be gnu to consume name-
+! spaced attributes.
 !
 module c_kind_params
   use, intrinsic :: iso_c_binding
