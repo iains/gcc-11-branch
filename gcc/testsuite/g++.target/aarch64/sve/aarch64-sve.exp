@@ -25,6 +25,11 @@ if {![istarget aarch64*-*-*] } then {
   return
 }
 
+# Darwin support is patchy so far, make it optional
+if { [istarget *-*-darwin*] && ![info exists env(DARWIN_TEST_SVE)]} then {
+  return
+}
+
 # Load support procs.
 load_lib g++-dg.exp
 
