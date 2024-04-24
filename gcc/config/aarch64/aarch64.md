@@ -1280,7 +1280,6 @@
    ldr\\t%s0, %1
    str\\t%w1, %0
    str\\t%s1, %0
-   * return TARGET_MACHO ? \"adrp\\t%x0, %A1\;ldr\\t%w0, [%x0, %O1]\" : \"adrp\\t%x0, %A1\;ldr\\t%w0, [%x0, %L1]\";
    adr\\t%x0, %c1
    adrp\\t%x0, %A1
    fmov\\t%s0, %w1
@@ -1317,7 +1316,6 @@
    ldr\\t%d0, %1
    str\\t%x1, %0
    str\\t%d1, %0
-   * return TARGET_ILP32 ? (TARGET_MACHO ? \"adrp\\t%0, %A1\;ldr\\t%w0, [%0, %O1]\" : \"adrp\\t%0, %A1\;ldr\\t%w0, [%0, %L1]\") : (TARGET_MACHO ? \"adrp\\t%0, %A1\;ldr\\t%0, [%0, %O1]\" : \"adrp\\t%0, %A1\;ldr\\t%0, [%0, %L1]\");
    adr\\t%x0, %c1
    adrp\\t%x0, %A1
    fmov\\t%d0, %x1
@@ -6726,7 +6724,10 @@
 			      (match_operand:PTR 2 "aarch64_valid_symref" "S")))]
 		    UNSPEC_GOTSMALLPIC))]
   ""
-  "ldr\\t%<w>0, [%1, #:got_lo12:%c2]"
+  { return TARGET_MACHO
+    ? "ldr\\t%<w>0, [%1, %O2]"
+    : "ldr\\t%<w>0, [%1, #:got_lo12:%c2]";
+  }
   [(set_attr "type" "load_<ldst_sz>")]
 )
 

@@ -2236,9 +2236,6 @@ static const struct attribute_spec aarch64_attribute_table[] =
 {
   /* { name, min_len, max_len, decl_req, type_req, fn_type_req,
        affects_type_identity, handler, exclude } */
-#ifdef SUBTARGET_ATTRIBUTE_TABLE
-  SUBTARGET_ATTRIBUTE_TABLE,
-#endif
   { "aarch64_vector_pcs", 0, 0, false, true,  true,  true,
 			  handle_aarch64_vector_pcs_attribute, NULL },
   { "arm_sve_vector_bits", 1, 1, false, true,  false, true,
@@ -2247,6 +2244,9 @@ static const struct attribute_spec aarch64_attribute_table[] =
   { "Advanced SIMD type", 1, 1, false, true,  false, true,  NULL, NULL },
   { "SVE type",		  3, 3, false, true,  false, true,  NULL, NULL },
   { "SVE sizeless type",  0, 0, false, true,  false, true,  NULL, NULL },
+#ifdef SUBTARGET_ATTRIBUTE_TABLE
+  SUBTARGET_ATTRIBUTE_TABLE,
+#endif
   { NULL,                 0, 0, false, false, false, false, NULL, NULL }
 };
 
@@ -6781,9 +6781,9 @@ aarch64_layout_arg (cumulative_args_t pcum_v, const function_arg_info &arg)
      so use this call directly.  */
   allocate_nvrn
     = aarch64_vfp_is_call_or_return_candidate (mode, type,
-						&pcum->aapcs_vfp_rmode,
-						&nregs, &is_ha,
-						pcum->silent_p);
+					       &pcum->aapcs_vfp_rmode,
+					       &nregs, &is_ha,
+					       pcum->silent_p);
 #endif
   gcc_assert (!sve_p || !allocate_nvrn);
 
@@ -7183,7 +7183,7 @@ aarch64_function_arg_boundary (machine_mode mode, const_tree type)
   if (abi_break && warn_psabi)
     {
       abi_break = MIN (MAX (abi_break, PARM_BOUNDARY), STACK_BOUNDARY);
-      if (alignment != abi_break)
+      if (alignment != abi_break && !TARGET_MACHO)
 	inform (input_location, "parameter passing for argument of type "
 		"%qT changed in GCC 9.1", type);
     }
