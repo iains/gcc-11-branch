@@ -7,12 +7,6 @@
     This had to be done to correct non-standard usages in the
     original, manufacturer supplied header file.  */
 
-#ifndef FIXINC_WRAP_MATH_H_MATH_EXCEPTION
-#define FIXINC_WRAP_MATH_H_MATH_EXCEPTION 1
-
-#ifdef __cplusplus
-#define exception __math_exception
-#endif
 
 
 #if defined( BROKEN_CABS_CHECK )
@@ -105,8 +99,3 @@ extern int class();
 int foo;
 #endif
 #endif  /* STRICT_ANSI_NOT_CTD_CHECK */
-#ifdef __cplusplus
-#undef exception
-#endif
-
-#endif  /* FIXINC_WRAP_MATH_H_MATH_EXCEPTION */
