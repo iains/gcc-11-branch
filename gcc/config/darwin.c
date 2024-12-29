@@ -3962,7 +3962,7 @@ darwin_override_options (void)
 
   /* We need to consume attributes on function definitions from the the SDK
      headers.  */
-  if (!OPTION_SET_P (flag_allow_ext_attr_placement))
+  if (!global_options_set.x_flag_allow_ext_attr_placement)
     flag_allow_ext_attr_placement = true;
 }
 
