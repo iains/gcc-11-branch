@@ -674,7 +674,9 @@ enum ModuleArch {
   kModuleArchARMV7S,
   kModuleArchARMV7K,
   kModuleArchARM64,
-  kModuleArchRISCV64
+  kModuleArchARM64E,
+  kModuleArchRISCV64,
+  kModuleArchHexagon
 };
 
 // Opens the file 'file_name" and reads up to 'max_len' bytes.
@@ -718,6 +720,8 @@ inline const char *ModuleArchToString(ModuleArch arch) {
       return "armv7k";
     case kModuleArchARM64:
       return "arm64";
+    case kModuleArchARM64E:
+      return "arm64e";
     case kModuleArchRISCV64:
       return "riscv64";
   }
