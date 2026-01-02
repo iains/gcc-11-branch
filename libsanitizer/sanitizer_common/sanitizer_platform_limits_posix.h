@@ -19,6 +19,21 @@
 #include "sanitizer_internal_defs.h"
 #include "sanitizer_platform.h"
 
+#if SANITIZER_MAC
+#include <sys/cdefs.h>
+#if !__DARWIN_ONLY_64_BIT_INO_T
+#define SANITIZER_HAS_STAT64 1
+#define SANITIZER_HAS_STATFS64 1
+#else
+#define SANITIZER_HAS_STAT64 0
+#define SANITIZER_HAS_STATFS64 0
+#endif
+#else
+// Must be SANITIZER_LINUX then
+#define SANITIZER_HAS_STAT64 1
+#define SANITIZER_HAS_STATFS64 1
+#endif
+
 #if defined(__sparc__)
 // FIXME: This can't be included from tsan which does not support sparc yet.
 #include "sanitizer_glibc_version.h"
@@ -29,7 +44,7 @@
 namespace __sanitizer {
 extern unsigned struct_utsname_sz;
 extern unsigned struct_stat_sz;
-#if !SANITIZER_IOS
+#if SANITIZER_HAS_STAT64
 extern unsigned struct_stat64_sz;
 #endif
 extern unsigned struct_rusage_sz;
@@ -49,16 +64,19 @@ extern unsigned struct_itimerspec_sz;
 extern unsigned struct_sigevent_sz;
 extern unsigned struct_stack_t_sz;
 extern unsigned struct_sched_param_sz;
+#if SANITIZER_HAS_STATFS64
 extern unsigned struct_statfs64_sz;
+#endif
 extern unsigned struct_regex_sz;
 extern unsigned struct_regmatch_sz;
 
 #if !SANITIZER_ANDROID
+#include <sys/ucontext.h>
 extern unsigned struct_fstab_sz;
 extern unsigned struct_statfs_sz;
 extern unsigned struct_sockaddr_sz;
-extern unsigned ucontext_t_sz;
-#endif // !SANITIZER_ANDROID
+unsigned ucontext_t_sz(ucontext_t /*void *uctx*/);
+#  endif  // !SANITIZER_ANDROID
 
 #if SANITIZER_LINUX
 
