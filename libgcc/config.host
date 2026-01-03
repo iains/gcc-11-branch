@@ -232,7 +232,10 @@ case ${host} in
     *-*-darwin1[89]*)
       tmake_file="t-darwin-min-8 $tmake_file"
       ;;
-    *-*-darwin9* | *-*-darwin1[0-7]*)
+    *-*-darwin1[67]*)
+      tmake_file="t-darwin-min-5 $tmake_file"
+      ;;
+    *-*-darwin9* | *-*-darwin1[0-5]*)
       tmake_file="t-darwin-min-5 t-darwin-libgccs1 $tmake_file"
       ;;
     *-*-darwin[4-8]*)
