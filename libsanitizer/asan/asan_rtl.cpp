@@ -28,6 +28,7 @@
 #include "sanitizer_common/sanitizer_libc.h"
 #include "sanitizer_common/sanitizer_symbolizer.h"
 #include "lsan/lsan_common.h"
+#include "sanitizer_common/sanitizer_interface_internal.h"
 #include "ubsan/ubsan_init.h"
 #include "ubsan/ubsan_platform.h"
 

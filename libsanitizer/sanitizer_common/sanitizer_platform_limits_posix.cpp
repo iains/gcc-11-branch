@@ -207,7 +207,25 @@ namespace __sanitizer {
   unsigned struct_fstab_sz = sizeof(struct fstab);
   unsigned struct_statfs_sz = sizeof(struct statfs);
   unsigned struct_sockaddr_sz = sizeof(struct sockaddr);
-  unsigned ucontext_t_sz = sizeof(ucontext_t);
+
+  unsigned ucontext_t_sz(void *ctx) {
+#    if SANITIZER_GLIBC && SANITIZER_X64
+    // Added in Linux kernel 3.4.0, merged to glibc in 2.16
+#      ifndef FP_XSTATE_MAGIC1
+#        define FP_XSTATE_MAGIC1 0x46505853U
+#      endif
+    // See kernel arch/x86/kernel/fpu/signal.c for details.
+    const auto *fpregs = static_cast<ucontext_t *>(ctx)->uc_mcontext.fpregs;
+    // The member names differ across header versions, but the actual layout
+    // is always the same.  So avoid using members, just use arithmetic.
+    const uint32_t *after_xmm =
+        reinterpret_cast<const uint32_t *>(fpregs + 1) - 24;
+    if (after_xmm[12] == FP_XSTATE_MAGIC1)
+      return reinterpret_cast<const char *>(fpregs) + after_xmm[13] -
+             static_cast<const char *>(ctx);
+#    endif
+    return sizeof(ucontext_t);
+  }
 #endif // !SANITIZER_ANDROID
 
 #if SANITIZER_LINUX

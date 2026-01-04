@@ -22,6 +22,7 @@
 #include "sanitizer_platform_limits_solaris.h"
 #include "sanitizer_posix.h"
 #include "sanitizer_procmaps.h"
+#include "sanitizer_interface_internal.h"
 
 #include <errno.h>
 #include <fcntl.h>

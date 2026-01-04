@@ -14,6 +14,7 @@
 #include "sanitizer_common.h"
 #include "sanitizer_flags.h"
 #include "sanitizer_procmaps.h"
+#include "sanitizer_interface_internal.h"
 
 
 namespace __sanitizer {

@@ -71,11 +71,10 @@ extern unsigned struct_regex_sz;
 extern unsigned struct_regmatch_sz;
 
 #if !SANITIZER_ANDROID
-#include <sys/ucontext.h>
 extern unsigned struct_fstab_sz;
 extern unsigned struct_statfs_sz;
 extern unsigned struct_sockaddr_sz;
-unsigned ucontext_t_sz(ucontext_t /*void *uctx*/);
+unsigned ucontext_t_sz(void *uctx);
 #  endif  // !SANITIZER_ANDROID
 
 #if SANITIZER_LINUX
