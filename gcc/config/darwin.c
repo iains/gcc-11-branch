@@ -3961,7 +3961,7 @@ darwin_override_options (void)
   darwin_running_cxx = (strstr (lang_hooks.name, "C++") != 0);
 
   /* Allow the clang extension to permit const vars used in array sizes.  */
-  if (!OPTION_SET_P (flag_allow_const_var_array_size))
+  if (!global_options_set.x_flag_allow_const_var_array_size)
     flag_allow_const_var_array_size = true;
 
   /* We need to consume attributes on function definitions from the the SDK
@@ -3970,7 +3970,7 @@ darwin_override_options (void)
     flag_allow_ext_attr_placement = true;
 
   /* We need to consume some C keywords in C++.  */
-  if (!OPTION_SET_P (flag_allow_extra_keywords))
+  if (!global_options_set.x_flag_allow_extra_keywords)
     flag_allow_extra_keywords = true;
 }
 
